@@ -1,0 +1,12 @@
+Package: arxiv
+Type: Package
+Title: Package for Downloading Metadata and Scraping the Arxiv
+Version: 0.1.0
+Author: Ali Zaidi
+Maintainer: Ali Zaidi <alizaidi@microsoft.com>
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: MIT
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1
