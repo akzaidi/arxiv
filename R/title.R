@@ -28,23 +28,27 @@ create_filename <- function(arx_url) {
   arx_html <- read_html(gsub("pdf", "abs", arx_url))
 
   title_author <- html_nodes(arx_html, ".title , .authors") %>% html_text
-  title <- title_author[1] %>% str_replace("Title:\n", "")
+  title <- title_author[1] %>% str_replace("Title:", "") %>%
+    str_replace("/", " ")
 
-  authors <- str_split(title_author[2], pattern = "\n")[[1]]
-  # first element is "Authors:"
-  authors <- authors[2:length(authors)]
-  authors <- gsub(", ", "", authors)
+  authors <- str_replace(title_author[2], "Authors:", "") %>%
+    str_split(string = ., pattern = ", ") %>%
+    unlist %>% str_replace(string = ., pattern = "\n    ", replacement = "")
+  # authors <- title_author[2] %>% str_replace("Authors:", "") %>% str_split(pattern = ", ")[[1]] %>%
+  #   str_replace("\n  ", "")
+  # # first element is "Authors:"
+  # authors <- authors[2:length(authors)]
+  # authors <- gsub(", ", "", authors)
 
   # max out at 5 authors
   if (length(authors) > 5) {
     author <- paste0(authors[1], " et al.")
   } else {
-    author <- title_author[2] %>%
-      str_replace("Authors:\n", "") %>%
-      str_replace_all(", \n", " & ")
+    author <- paste0(authors, collapse = " & ")
   }
 
   file_name <- str_c(author, " - ", title)
+  file_name <- gsub("  ", " ", file_name)
   file_name
 
 }
@@ -65,6 +69,16 @@ download_paper <- function(arx_url, loc,
   if (str_detect(arx_url, "abs")) {
     arx_url <- gsub("abs", "pdf", arx_url)
     arx_url <- paste0(arx_url, ".pdf")
+  }
+
+  if (str_detect(arx_url, "aclweb")) {
+    arx_url <- str_replace(arx_url, "http", "https")
+    arx_url <- str_replace(arx_url, "aclweb.org", "aclanthology.info")
+    arx_url <- str_replace(arx_url, "/anthology/", "/papers/")
+    arx_list <- str_split(arx_url, "/")[[1]]
+    arx_list <- c(arx_list, str_to_lower(arx_list[length(arx_list)]))
+    arx_url <- str_c(arx_list, collapse = "/")
+
   }
 
   cat(sprintf("Saving file: \n%s \nto: \n%s \n",
